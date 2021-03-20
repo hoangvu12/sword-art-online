@@ -1,0 +1,234 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+.messenger-container {
+  position: absolute;
+  top: 10em;
+  right: 5;
+  display: flex;
+  /* letter-spacing: 0.5px; */
+  opacity: 0.9;
+  font-family: Roboto;
+}
+
+.messenger {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  width: 75vw;
+  height: 50vh;
+  color: var(--dark-text);
+}
+
+.messenger > .container-left,
+.messenger > .container-right {
+  background-color: var(--dark-main);
+}
+
+.messenger > .container-left {
+  border-radius: 30px 0 0 30px;
+  border-right: 2px solid #393a3b;
+}
+
+.messenger > .container-right {
+  border-radius: 0 30px 30px 0;
+  position: relative;
+}
+
+.messenger .title-heading {
+  font-size: 27px;
+  margin: 12px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.messenger .conversation {
+  display: grid;
+  grid-template-columns: 30% 70%;
+  padding: 12px;
+  cursor: pointer;
+}
+
+.messenger .conversation:hover,
+.messenger .conversation.conversation-active {
+  background: linear-gradient(
+    0deg,
+    rgba(255, 0, 150, 0.3),
+    rgba(255, 0, 150, 0.3)
+  );
+}
+
+.messenger .thumb {
+  width: 56px;
+  height: 56px;
+  margin-left: 10px;
+}
+
+.messenger .thumb img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  float: left;
+}
+
+.conversation-header .thumb {
+  width: 40px;
+  height: 40px;
+}
+
+.conversation-body .message {
+  margin: 10px;
+}
+
+.conversation-body .message .time {
+  color: #8a8d91;
+  font-size: 11px;
+  width: 100%;
+  text-align: center;
+}
+
+.conversation-body .message .thumb {
+  width: 28px;
+  height: 28px;
+}
+
+.conversation-body .message .name {
+  margin-left: 60px;
+  font-size: 11px;
+  color: #b0b3b8;
+}
+
+.conversation-body .message .content {
+  display: flex;
+  align-items: center;
+}
+
+.conversation-body .message .content .body {
+  margin-left: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  max-width: 90%;
+}
+
+.conversation-body .message .content .body.text {
+  background-color: #3e4042;
+  max-width: 80%;
+}
+
+.conversation-body .message .content .body.share {
+  background-color: #18191a;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.conversation-body .message .content .body.photo {
+  max-width: 75%;
+  height: 35em;
+}
+
+.conversation-body .message .content .body img {
+  max-width: 100%;
+  object-fit: cover;
+  margin: 10px auto;
+  height: 97%;
+  border-radius: 20px;
+}
+
+.conversation-body .message-me {
+  /* display: flex;
+  justify-content: flex-end; */
+}
+
+.conversation-body .message-me .content {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.conversation-body .message-me .content .body.text {
+  background-color: #65a9ff;
+  color: #fff;
+}
+
+.messenger .conversation .info {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.messenger .conversation .recent-message {
+  color: #b0b3b8;
+}
+
+.messenger .conversation-unread .recent-message {
+  color: #2e89ff;
+}
+
+.messenger .conversation .info > div {
+  margin-left: 12px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.conversation-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.conversation-header > div {
+  margin: 10px;
+}
+
+.conversation-input {
+  display: flex;
+  margin: 12px auto;
+  width: 75%;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 99999 !important;
+}
+
+.conversation-input > input {
+  width: 100%;
+  background-color: #3a3b3c;
+  min-height: 20px;
+  padding: 12px;
+  border-radius: 55px;
+  border: 0;
+  color: #e4e6eb;
+  font-size: 15px;
+}
+
+.conversation-input .btn {
+  background-color: transparent !important;
+  color: #5f234e;
+  border: 0;
+  cursor: pointer;
+  padding: 7px;
+  text-align: center;
+}
+
+.conversation-input .btn:hover {
+  opacity: 0.8;
+  background-color: #949393cb !important;
+  border-radius: 50%;
+}
+
+.messenger-conversations,
+.conversation-body {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-height: 300px;
+  min-height: 300px;
+}
+
+.unread-icon {
+  position: absolute;
+  background-color: #2e89ff;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  right: 0;
+}
