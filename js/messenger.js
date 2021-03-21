@@ -1,8 +1,8 @@
 let myID = "";
 let threadList;
+let lastMessageTimestamp;
 
 let currentThread;
-let visitedThread = [];
 
 function showThreadList(list) {
   const $container = $(".messenger-conversations");
@@ -12,46 +12,50 @@ function showThreadList(list) {
   threadList = list;
 
   // Loop through each thread
-  list.forEach((thread) => {
-    // Create a div thread container.
-    const divContainer = document.createElement("div");
-    divContainer.className = "conversation";
+  $container.append(list.map((thread) => createThread(thread)));
 
-    if (currentThread === thread.threadID) {
-      $(divContainer).addClass("conversation-active");
-    }
+  handleScroll($container);
+}
 
-    // Create info container
-    const { info, element: divInfo } = createInfo(thread);
+function createThread(thread) {
+  // Create a div thread container.
+  const divContainer = document.createElement("div");
+  divContainer.className = "conversation";
 
-    // Create thumbnail container.
-    const { thumbnail, element: divThumbnail } = createThumbnail(thread);
+  if (currentThread === thread.threadID) {
+    $(divContainer).addClass("conversation-active");
+  }
 
-    // If unread counter > 0 then add unread.
-    if (thread.unreadCount > 0) {
-      $(divContainer).addClass("conversation-unread");
-    }
+  const thumbnail = thread.imageSrc || thread.participants[0].profilePicture;
 
-    // Add data to container.
-    $(divContainer).data({
-      name: info.name,
-      thumbnail,
-      id: thread.threadID,
-    });
+  // Create info container
+  const divInfo = createInfo(thread);
 
-    $(divContainer).append([divThumbnail, divInfo]);
+  // Create thumbnail container.
+  const divThumbnail = createThumbnail(thumbnail);
 
-    $(divContainer).click(() => {
-      requestMessages(thread.threadID); // First request messages from server.
-      removeActiveThreads(); // Remove active threads.
-      addActiveThread(thread.threadID); // Add clicked thread to active state.
-      currentThread = thread.threadID;
-    });
+  // If unread counter > 0 then add unread.
+  if (thread.unreadCount > 0) {
+    $(divContainer).addClass("conversation-unread");
+  }
 
-    $container.append(divContainer);
-
-    handleScroll($container);
+  // Add data to container.
+  $(divContainer).data({
+    name: thread.name,
+    thumbnail,
+    id: thread.threadID,
   });
+
+  $(divContainer).append([divThumbnail, divInfo]);
+
+  $(divContainer).click(() => {
+    requestMessages(thread.threadID); // First request messages from server.
+    removeActiveThreads(); // Remove active threads.
+    addActiveThread(thread.threadID); // Add clicked thread to active state.
+    currentThread = thread.threadID;
+  });
+
+  return divContainer;
 
   function createInfo(info) {
     const divInfo = document.createElement("div");
@@ -86,12 +90,10 @@ function showThreadList(list) {
     }
 
     // if there is unread messages, add unread icon (a little dot).
-    if (info.unreadCount > 0) {
-      const divIcon = document.createElement("div");
-      divIcon.className = "unread-icon";
+    const divIcon = document.createElement("div");
+    divIcon.className = "unread-icon";
 
-      $(divInfo).append(divIcon);
-    }
+    $(divInfo).append(divIcon);
 
     // Recent message.
     recentMessage.className = "recent-message";
@@ -99,25 +101,7 @@ function showThreadList(list) {
 
     $(divInfo).append([divName, recentMessage]);
 
-    let returnData = { name: info.name, recentMsg };
-
-    return { info: returnData, element: divInfo };
-  }
-
-  function createThumbnail(info) {
-    // If the thread is a group, take group's image otherwise take first member's profile picture.
-    let thumbnail = info.imageSrc || info.participants[0].profilePicture;
-
-    const divThumbnail = document.createElement("div");
-    divThumbnail.className = "thumb";
-
-    const image = document.createElement("img");
-
-    image.src = thumbnail;
-
-    $(divThumbnail).append(image);
-
-    return { thumbnail, element: divThumbnail };
+    return divInfo;
   }
 
   function removeActiveThreads() {
@@ -147,36 +131,12 @@ function showThreadHeader(threadID) {
   const conversationEl = $("*").filterByData("id", threadID);
 
   // Thumbnail container
-  const { element: divThumbnail } = createThumbnail(
-    conversationEl.data("thumbnail")
-  );
+  const divThumbnail = createThumbnail(conversationEl.data("thumbnail"));
 
   // Name container
-  const { element: divName } = createName(conversationEl.data("name"));
+  const divName = createName(conversationEl.data("name"));
 
   $container.append([divThumbnail, divName]);
-
-  function createName(name) {
-    const divName = document.createElement("div");
-    divName.className = "name";
-
-    divName.innerText = name;
-
-    return { name, element: divName };
-  }
-
-  function createThumbnail(thumbnail) {
-    const divThumbnail = document.createElement("div");
-    divThumbnail.className = "thumb";
-
-    const image = document.createElement("img");
-
-    image.src = thumbnail;
-
-    $(divThumbnail).append(image);
-
-    return { thumbnail, element: divThumbnail };
-  }
 }
 
 function showThreadMessages(history) {
@@ -187,87 +147,54 @@ function showThreadMessages(history) {
     id: history.id,
   });
 
-  let lastMessageTimestamp;
-  let firstTime = true;
-
   $container.empty();
 
-  // Loop for messages
-  history.data.forEach((message) => {
-    let divTime;
-    let divName = null;
+  $container.append(history.data.map((message) => createMessage(message)));
 
-    const divMessage = document.createElement("div");
-    divMessage.className = "message";
-
-    // This is decide if the message should show time (if time between two messages bigger than 1 hour)
-    if (!lastMessageTimestamp) {
-      lastMessageTimestamp = Number(message.timestamp); // Save timestamp to a flag.
-    } else {
-      let savedDate = moment(lastMessageTimestamp);
-      let messageDate = moment(Number(message.timestamp));
-
-      // Get time between two messages.
-      let timeDifferent = dateDifference(messageDate, savedDate, "hours");
-
-      // If it bigger than 1 hour, add time.
-      if (timeDifferent >= 1) {
-        divTime = document.createElement("div");
-        divTime.className = "time";
-        divTime.innerText = moment(Number(message.timestamp)).format(
-          "hh:mm A MM/DD/yyyy"
-        );
-      }
-
-      // Save new timestamp to flag.
-      lastMessageTimestamp = Number(message.timestamp);
-    }
-
-    // If the message is mine, add class message-me to show it is mine.
-    if (message.senderID === myID) {
-      $(divMessage).addClass("message-me");
-    }
-
-    const userInfo = getUserInfo(message.senderID, message.threadID);
-
-    // If message's thread is a group and the message isn't mine. Add a name to it.
-    if (message.isGroup && message.senderID !== myID) {
-      const { element } = createName(userInfo.name);
-
-      divName = element;
-    }
-
-    const { element: divContent } = createContent(message, userInfo);
-
-    $(divMessage).append([
-      divTime ? divTime : "",
-      divName ? divName : "",
-      divContent,
-    ]);
-
-    $container.append(divMessage);
-  });
-
-  if (!visitedThread.includes(history.id)) {
-    container.scrollTop = container.scrollHeight;
-    visitedThread.push(history.id);
-  } else if (
-    container.scrollTop + container.clientHeight ===
-    container.scrollHeight
-  ) {
-    container.scrollTop = container.scrollHeight;
-  }
+  scrollToLatestMessage();
 
   handleScroll($container);
+}
 
-  function createName(name) {
-    const divName = document.createElement("div");
-    divName.className = "name";
+function scrollToLatestMessage() {
+  const $container = $(".conversation-body");
+  const container = $container.get(0);
 
-    divName.innerText = name;
+  container.scrollTop = container.scrollHeight;
+}
 
-    return { name, element: divName };
+function createMessage(message) {
+  let divTime;
+  let divName = null;
+
+  const divMessage = document.createElement("div");
+  divMessage.className = "message";
+
+  if (isValidTime(message.timestamp)) {
+    divTime = document.createElement("div");
+    divTime.className = "time";
+    divTime.innerText = moment(Number(message.timestamp)).format(
+      "hh:mm A MM/DD/yyyy"
+    );
   }
+
+  // If the message is mine, add class message-me to show it is mine.
+  if (message.senderID === myID) {
+    $(divMessage).addClass("message-me");
+  }
+
+  const userInfo = getUserInfo(message.senderID, message.threadID);
+
+  // If message's thread is a group and the message isn't mine. Add a name to it.
+  if (message.isGroup && message.senderID !== myID) {
+    divName = createName(userInfo.name);
+  }
+
+  const divContent = createContent(message, userInfo);
+
+  $(divMessage).append([divTime, divName, divContent]);
+
+  return divMessage;
 
   function createContent(messageObj, userInfo) {
     const divContent = document.createElement("div");
@@ -276,18 +203,16 @@ function showThreadMessages(history) {
     let divThumbnail = null;
 
     if (userInfo.userID !== myID) {
-      const { element } = createThumbnail(userInfo.profilePicture);
-
-      divThumbnail = element;
+      divThumbnail = createThumbnail(userInfo.profilePicture);
     }
 
-    const { element: divBody } = createBody(
+    const divBody = createBody(
       messageObj.body || messageObj.attachments || messageObj.snippet
     );
 
-    $(divContent).append([divThumbnail ? divThumbnail : null, divBody]);
+    $(divContent).append([divThumbnail, divBody]);
 
-    return { element: divContent };
+    return divContent;
 
     function createBody(message) {
       const divMessage = document.createElement("div");
@@ -324,32 +249,48 @@ function showThreadMessages(history) {
         divMessage.innerText = message;
       }
 
-      return { element: divMessage };
-    }
-
-    function createThumbnail(thumbnail) {
-      const divThumbnail = document.createElement("div");
-      divThumbnail.className = "thumb";
-
-      const image = document.createElement("img");
-
-      image.src = thumbnail;
-
-      $(divThumbnail).append(image);
-
-      return { thumbnail, element: divThumbnail };
+      return divMessage;
     }
   }
 }
 
-function updateMessages(threadID) {
+function handleNewMessage(message) {
+  updateMessage(message);
+  updateThread(message);
+}
+
+function updateThread(message) {
+  const conversationEl = $("*").filterByData("id", message.threadID).get(0);
+  const conversationsContainer = $(".messenger-conversations").get(0);
+
+  const firstChild = conversationsContainer.childNodes[0];
+
+  conversationsContainer.insertBefore(conversationEl, firstChild);
+
+  const userInfo = getUserInfo(message.senderID, message.threadID);
+
+  let recentMsg;
+
+  if (message.senderID === myID) {
+    recentMsg = message.body;
+  } else {
+    recentMsg = `${userInfo.shortName}: ${message.body}`;
+  }
+
+  $(conversationEl)
+    .addClass("conversation-unread")
+    .find(".recent-message")
+    .text(recentMsg);
+}
+
+function updateMessage(message) {
   const $bodyContainer = $(".conversation-body");
 
-  if ($bodyContainer.data("id") !== threadID) return;
+  if ($bodyContainer.data("id") !== message.threadID) return;
 
-  console.log("Requested messages");
+  const divMessage = createMessage(message);
 
-  requestMessages(threadID);
+  $bodyContainer.append(divMessage);
 }
 
 function sendMessage(message) {
@@ -367,6 +308,8 @@ $(".send-btn").click(() => {
   sendMessage(messageInput.val());
 
   messageInput.val("");
+
+  scrollToLatestMessage();
 });
 
 $(".message-input").keypress((e) => {
@@ -388,6 +331,51 @@ function getUserInfo(senderID, threadID) {
 
     return thread.participants.find((user) => user.userID === senderID);
   }
+}
+
+function isValidTime(timestamp) {
+  // This is decide if the message should show time (if time between two messages bigger than 1 hour)
+  if (!lastMessageTimestamp) {
+    lastMessageTimestamp = Number(timestamp); // Save timestamp to a flag.
+
+    return false;
+  }
+
+  let savedDate = moment(lastMessageTimestamp);
+  let messageDate = moment(Number(timestamp));
+
+  // Get time between two messages.
+  let timeDifferent = dateDifference(messageDate, savedDate, "hours");
+
+  // Save new timestamp to flag.
+  lastMessageTimestamp = Number(timestamp);
+
+  // If it bigger than 1 hour, add time.
+  if (timeDifferent >= 1) return true;
+
+  return false;
+}
+
+function createThumbnail(thumbnail) {
+  const divThumbnail = document.createElement("div");
+  divThumbnail.className = "thumb";
+
+  const image = document.createElement("img");
+
+  image.src = thumbnail;
+
+  $(divThumbnail).append(image);
+
+  return divThumbnail;
+}
+
+function createName(name) {
+  const divName = document.createElement("div");
+  divName.className = "name";
+
+  divName.innerText = name;
+
+  return divName;
 }
 
 function dateDifference(startDate, endDate, unit = "seconds") {
@@ -428,6 +416,6 @@ function handleScroll(container) {
 
 $.fn.filterByData = function (prop, val) {
   return this.filter(function () {
-    return $(this).data(prop) == val;
+    return $(this).data(prop) === val;
   });
 };

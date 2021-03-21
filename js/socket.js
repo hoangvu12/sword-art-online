@@ -6,15 +6,10 @@ socket.on("connect", () => {
     socket.emit("request--message");
   };
 
-  const refresh = (threadID) => {
-    socket.emit("request--thread-list");
-    updateMessages(threadID);
-  };
-
   init();
 
   socket.on("receive--message", (msg) => {
-    refresh(msg.threadID);
+    handleNewMessage(msg);
   });
 
   socket.on("receive--thread-list", (list) => {
