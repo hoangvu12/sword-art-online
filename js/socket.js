@@ -26,7 +26,3 @@ socket.on("connect", () => {
     showThreadMessages(history);
   });
 });
-
-socket.on("disconnect", () => {
-  socket.removeAllListeners();
-});
