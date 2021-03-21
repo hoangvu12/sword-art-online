@@ -157,11 +157,13 @@ function showThreadMessages(history) {
     threadMessages[history.id] = history; // Save thread messages to memory.
   }
 
-  console.log(history.data);
-
   $container.empty();
 
-  $container.append(history.data.map((message) => createMessage(message)));
+  $container.append(
+    history.data
+      .filter((message) => message.type === "message")
+      .map((message) => createMessage(message))
+  );
 
   scrollToLatestMessage();
 
@@ -229,17 +231,20 @@ function createMessage(message) {
         photo: (container, attachment) => {
           $(container).addClass("photo");
 
-          $(container).append(photoAttachment(attachment));
+          $(container).append(imageBasedAttachment(attachment));
         },
         sticker: (container, attachment) => {
           $(container).addClass("sticker");
 
-          $(container).append(stickerAttachment(attachment));
+          $(container).append(imageBasedAttachment(attachment));
         },
         share: (container, attachment) => {
-          $(divMessage).addClass("share");
+          $(container).addClass("share");
 
-          container.innerText = attachment.description;
+          const span = document.createElement("span");
+          span.innerText = attachment.description;
+
+          $(container).append(span);
         },
       };
 
@@ -265,16 +270,7 @@ function createMessage(message) {
 
       return divMessage;
 
-      function photoAttachment(attachment) {
-        const img = document.createElement("img");
-
-        img.src = attachment.largePreviewUrl;
-        img.width = attachment.largePreviewWidth;
-
-        return img;
-      }
-
-      function stickerAttachment(attachment) {
+      function imageBasedAttachment(attachment) {
         const img = document.createElement("img");
 
         img.src = attachment.url;
