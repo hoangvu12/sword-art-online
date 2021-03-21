@@ -102,15 +102,21 @@
 }
 
 .conversation-body .message .content .body {
+  display: flex;
   margin-left: 10px;
-  padding: 8px 12px;
-  border-radius: 20px;
   max-width: 90%;
+  flex-direction: column;
 }
 
-.conversation-body .message .content .body.text {
+.conversation-body .message-me .content .body {
+  align-items: flex-end;
+}
+
+.conversation-body .message .content .body.text span {
   background-color: #3e4042;
   max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 20px;
 }
 
 .conversation-body .message .content .body.share {
@@ -142,7 +148,7 @@
   justify-content: flex-end;
 }
 
-.conversation-body .message-me .content .body.text {
+.conversation-body .message-me .content .body.text span {
   background-color: #65a9ff;
   color: #fff;
 }
@@ -220,8 +226,7 @@
 .conversation-body {
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  overflow: hidden;
   max-height: 300px;
   min-height: 300px;
 }

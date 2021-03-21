@@ -1,8 +1,9 @@
-let myID = "";
+let myID = ""; // Your facebook UID
 let threadList;
 let lastMessageTimestamp;
 
 let currentThread;
+let threadMessages = {};
 
 function showThreadList(list) {
   const $container = $(".messenger-conversations");
@@ -49,7 +50,13 @@ function createThread(thread) {
   $(divContainer).append([divThumbnail, divInfo]);
 
   $(divContainer).click(() => {
-    requestMessages(thread.threadID); // First request messages from server.
+    if (!(thread.threadID in threadMessages)) {
+      requestMessages(thread.threadID); // First request messages from server.
+    } else {
+      showThreadMessages(threadMessages[thread.threadID]);
+      showThreadHeader(thread.threadID);
+    }
+
     removeActiveThreads(); // Remove active threads.
     addActiveThread(thread.threadID); // Add clicked thread to active state.
     currentThread = thread.threadID;
@@ -141,11 +148,16 @@ function showThreadHeader(threadID) {
 
 function showThreadMessages(history) {
   const $container = $(".conversation-body");
-  const container = $container.get(0);
 
   $container.data({
     id: history.id,
   });
+
+  if (!(history.id in threadMessages)) {
+    threadMessages[history.id] = history; // Save thread messages to memory.
+  }
+
+  console.log(history.data);
 
   $container.empty();
 
@@ -206,50 +218,71 @@ function createMessage(message) {
       divThumbnail = createThumbnail(userInfo.profilePicture);
     }
 
-    const divBody = createBody(
-      messageObj.body || messageObj.attachments || messageObj.snippet
-    );
+    const divBody = createBody(messageObj);
 
     $(divContent).append([divThumbnail, divBody]);
 
     return divContent;
 
     function createBody(message) {
+      const attachmentTypes = {
+        photo: (container, attachment) => {
+          $(container).addClass("photo");
+
+          $(container).append(photoAttachment(attachment));
+        },
+        sticker: (container, attachment) => {
+          $(container).addClass("sticker");
+
+          $(container).append(stickerAttachment(attachment));
+        },
+        share: (container, attachment) => {
+          $(divMessage).addClass("share");
+
+          container.innerText = attachment.description;
+        },
+      };
+
       const divMessage = document.createElement("div");
       divMessage.className = "body";
 
-      // Message now is an array of attachments
-      if (Array.isArray(message)) {
-        message.forEach((attachment) => {
-          const img = document.createElement("img");
+      if (message.body) {
+        const span = document.createElement("span");
+        span.innerText = message.body;
 
-          if (attachment.type === "photo") {
-            $(divMessage).addClass("photo");
-
-            img.src = attachment.largePreviewUrl;
-            img.width = attachment.largePreviewWidth;
-
-            $(divMessage).append(img);
-          } else if (attachment.type === "sticker") {
-            $(divMessage).addClass("sticker");
-
-            img.src = attachment.url;
-            img.width = attachment.width;
-            img.height = attachment.height;
-
-            $(divMessage).append(img);
-          } else if (attachment.type === "share") {
-            $(divMessage).addClass("share");
-
-            divMessage.innerText = attachment.description;
-          }
-        });
-      } else {
         $(divMessage).addClass("text");
-        divMessage.innerText = message;
+        $(divMessage).append(span);
+      }
+
+      // Message now is an array of attachments
+      if (Array.isArray(message.attachments)) {
+        message.attachments
+          .filter((attachment) => attachment.type in attachmentTypes)
+          .forEach((attachment) => {
+            attachmentTypes[attachment.type](divMessage, attachment);
+          });
       }
 
       return divMessage;
+
+      function photoAttachment(attachment) {
+        const img = document.createElement("img");
+
+        img.src = attachment.largePreviewUrl;
+        img.width = attachment.largePreviewWidth;
+
+        return img;
+      }
+
+      function stickerAttachment(attachment) {
+        const img = document.createElement("img");
+
+        img.src = attachment.url;
+        img.width = attachment.width;
+        img.height = attachment.height;
+
+        return img;
+      }
     }
   }
 }
@@ -286,11 +319,19 @@ function updateThread(message) {
 function updateMessage(message) {
   const $bodyContainer = $(".conversation-body");
 
+  const savedMessages = threadMessages[message.threadID]?.data || [];
+
+  savedMessages.push(message);
+
   if ($bodyContainer.data("id") !== message.threadID) return;
 
   const divMessage = createMessage(message);
 
   $bodyContainer.append(divMessage);
+
+  if (message.senderID === myID) {
+    scrollToLatestMessage();
+  }
 }
 
 function sendMessage(message) {
