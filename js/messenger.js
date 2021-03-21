@@ -1,5 +1,8 @@
-let myID = "100029483922771";
+let myID = "";
 let threadList;
+
+let currentThread;
+let visitedThread = [];
 
 function showThreadList(list) {
   const $container = $(".messenger-conversations");
@@ -13,6 +16,10 @@ function showThreadList(list) {
     // Create a div thread container.
     const divContainer = document.createElement("div");
     divContainer.className = "conversation";
+
+    if (currentThread === thread.threadID) {
+      $(divContainer).addClass("conversation-active");
+    }
 
     // Create info container
     const { info, element: divInfo } = createInfo(thread);
@@ -38,9 +45,12 @@ function showThreadList(list) {
       requestMessages(thread.threadID); // First request messages from server.
       removeActiveThreads(); // Remove active threads.
       addActiveThread(thread.threadID); // Add clicked thread to active state.
+      currentThread = thread.threadID;
     });
 
     $container.append(divContainer);
+
+    handleScroll($container);
   });
 
   function createInfo(info) {
@@ -238,15 +248,17 @@ function showThreadMessages(history) {
     $container.append(divMessage);
   });
 
-  if (firstTime) {
+  if (!visitedThread.includes(history.id)) {
     container.scrollTop = container.scrollHeight;
-    firstTime = false;
+    visitedThread.push(history.id);
   } else if (
     container.scrollTop + container.clientHeight ===
     container.scrollHeight
   ) {
     container.scrollTop = container.scrollHeight;
   }
+
+  handleScroll($container);
 
   function createName(name) {
     const divName = document.createElement("div");
@@ -380,6 +392,38 @@ function getUserInfo(senderID, threadID) {
 
 function dateDifference(startDate, endDate, unit = "seconds") {
   return moment(startDate).diff(moment(endDate), unit);
+}
+
+function handleScroll(container) {
+  let isDown = false;
+  let startY;
+  let scrollTop;
+
+  container.mousedown((e) => {
+    isDown = true;
+    startY = e.pageY - container.offset().top;
+    scrollTop = container.scrollTop();
+  });
+
+  container.mouseleave(() => {
+    isDown = false;
+  });
+
+  container.mouseup(() => {
+    isDown = false;
+  });
+
+  container.mousemove((e) => {
+    if (!isDown) return;
+
+    e.preventDefault();
+
+    const y = e.pageY - container.offset().top;
+
+    const distance = (y - startY) * 1.2;
+
+    container.scrollTop(scrollTop - distance);
+  });
 }
 
 $.fn.filterByData = function (prop, val) {

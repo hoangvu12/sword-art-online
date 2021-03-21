@@ -76,6 +76,7 @@ ul {
 }
 
 .menu-item {
+  position: relative;
   background-image: url("../images/ring_button_off.svg");
   background-repeat: no-repeat;
   background-size: contain;

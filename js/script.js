@@ -1,8 +1,8 @@
 $(() => {
-  // ui_ready({
-  //   clock: true,
-  //   calendar: true,
-  // });
+  ui_ready({
+    clock: true,
+    calendar: true,
+  });
 
   $(".calendar-container").shortcut({
     target: ".calendar",
@@ -13,7 +13,7 @@ $(() => {
   $(".messenger-container").shortcut({
     icon: "forum",
     target: ".messenger",
-    autostart: true,
+    autostart: false,
   });
 
   let menu = $(".menu-container").menu({
