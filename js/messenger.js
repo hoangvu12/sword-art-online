@@ -75,14 +75,15 @@ function createThread(thread) {
     const recentMessage = document.createElement("div");
 
     let recentMsg;
-    let name;
+
+    // Find info from who sent the last message.
+    let snippetSender = info.participants.find(
+      (user) => user.userID === info.snippetSender
+    );
 
     // Decide to show what recent message should show.
-    if (!info.snippet.includes("You sent") && info.isGroup) {
-      // Find info from who sent the last message.
-      let snippetSender = info.participants.find(
-        (user) => user.userID === info.snippetSender
-      );
+    if (info.isGroup) {
+      let name;
 
       // If it was me, show "You" instead of my name.
       if (info.snippetSender === myID) {
@@ -93,7 +94,11 @@ function createThread(thread) {
 
       recentMsg = `${name}: ${info.snippet}`;
     } else {
-      recentMsg = info.snippet;
+      if (info.snippetSender === myID && !info.snippet.includes("You")) {
+        recentMsg = `You: ${info.snippet}`;
+      } else {
+        recentMsg = info.snippet;
+      }
     }
 
     // if there is unread messages, add unread icon (a little dot).
@@ -184,6 +189,9 @@ function createMessage(message) {
   const divMessage = document.createElement("div");
   divMessage.className = "message";
 
+  const divReader = document.createElement("div");
+  divReader.className = "reader";
+
   if (isValidTime(message.timestamp)) {
     divTime = document.createElement("div");
     divTime.className = "time";
@@ -206,11 +214,13 @@ function createMessage(message) {
 
   const divContent = createContent(message, userInfo);
 
-  $(divMessage).append([divTime, divName, divContent]);
+  $(divMessage).append([divTime, divName, divContent, divReader]);
 
   return divMessage;
 
   function createContent(messageObj, userInfo) {
+    console.log(messageObj);
+
     const divContent = document.createElement("div");
     divContent.className = "content";
 
@@ -274,8 +284,8 @@ function createMessage(message) {
         const img = document.createElement("img");
 
         img.src = attachment.url;
-        img.width = attachment.width;
-        img.height = attachment.height;
+        img.width = attachment.width / 2;
+        img.height = attachment.height / 2;
 
         return img;
       }
@@ -291,6 +301,7 @@ function handleNewMessage(message) {
 function updateThread(message) {
   const conversationEl = $("*").filterByData("id", message.threadID).get(0);
   const conversationsContainer = $(".messenger-conversations").get(0);
+  const $bodyContainer = $(".conversation-body");
 
   const firstChild = conversationsContainer.childNodes[0];
 
@@ -300,16 +311,45 @@ function updateThread(message) {
 
   let recentMsg;
 
-  if (message.senderID === myID) {
-    recentMsg = message.body;
-  } else {
-    recentMsg = `${userInfo.shortName}: ${message.body}`;
+  let additionalMsg;
+
+  if (message.body) {
+    if (message.senderID === myID) {
+      recentMsg = `You: ${message.body}`;
+    } else {
+      recentMsg = `${userInfo.shortName}: ${message.body}`;
+    }
+  } else if (message.attachments[0]?.type === "photo") {
+    if (message.senderID === myID) {
+      recentMsg = "You sent photo(s).";
+    } else {
+      recentMsg = `${userInfo.shortName} sent photo(s)`;
+    }
+  } else if (message.attachments[0]?.type === "sticker") {
+    const attachment = message.attachments[0];
+
+    const img = document.createElement("img");
+
+    img.src = attachment.url;
+
+    additionalMsg = img;
+
+    if (message.senderID === myID) {
+      recentMsg = "You: ";
+    } else {
+      recentMsg = `${userInfo.shortName}: `;
+    }
   }
 
-  $(conversationEl)
-    .addClass("conversation-unread")
-    .find(".recent-message")
-    .text(recentMsg);
+  if ($bodyContainer.data("id") !== message.threadID) {
+    $(conversationEl).addClass("conversation-unread");
+  }
+
+  const recentMessage_div = $(conversationEl).find(".recent-message");
+
+  recentMessage_div.text(recentMsg);
+
+  if (additionalMsg) recentMessage_div.append(additionalMsg);
 }
 
 function updateMessage(message) {
@@ -456,3 +496,7 @@ $.fn.filterByData = function (prop, val) {
     return $(this).data(prop) === val;
   });
 };
+
+function isEmptyArray(array) {
+  return JSON.stringify(array) === "[]";
+}

@@ -96,6 +96,14 @@
   color: #b0b3b8;
 }
 
+.conversation-body .message .reader img {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  float: right;
+  margin-left: 2px;
+}
+
 .conversation-body .message .content {
   display: flex;
   align-items: center;
@@ -106,6 +114,10 @@
   margin-left: 10px;
   max-width: 80%;
   flex-direction: column;
+}
+
+.conversation-body .message .content .body span {
+  border-radius: 20px;
 }
 
 .conversation-body .message-me .content .body {
@@ -119,10 +131,11 @@
   border-radius: 20px;
 }
 
-.conversation-body .message .content .body.share {
+.conversation-body .message .content .body.share span {
   background-color: #18191a;
   font-style: italic;
   color: rgba(255, 255, 255, 0.3);
+  padding: 12px;
 }
 
 .conversation-body .message .content .body.photo {
@@ -138,9 +151,8 @@
   border-radius: 20px;
 }
 
-.conversation-body .message-me {
-  /* display: flex;
-  justify-content: flex-end; */
+.conversation-body .message .content .body.sticker img {
+  border-radius: 0;
 }
 
 .conversation-body .message-me .content {
@@ -162,6 +174,12 @@
 
 .messenger .conversation .recent-message {
   color: #b0b3b8;
+}
+
+.messenger .conversation .recent-message img {
+  margin-top: 5px;
+  width: 16px;
+  height: 16px;
 }
 
 .messenger .conversation-unread .recent-message {
