@@ -62,14 +62,14 @@ function welcome() {
     })
     .add({
       opacity: [0, 1],
-      width: ["0px", "600px"],
-      duration: 700,
+      width: ["0vw", "100vw"],
+      duration: 1500,
       endDelay: 2000,
     })
     .add({
-      width: ["600px", "0px"],
+      width: ["100vw", "0vw"],
       opacity: [1, 0],
-      duration: 700,
+      duration: 1500,
     });
 }
 

@@ -33,11 +33,13 @@ h1 {
   position: absolute;
   text-align: center;
   width: 100%;
+  z-index: 10;
 }
 
 .welcome-text {
+  width: 100vw;
   max-height: 60px;
-  font-size: 50px;
+  font-size: 3em;
   color: #f3f4f7;
   -webkit-text-stroke-width: 0.2px;
   -webkit-text-stroke-color: black;
@@ -135,10 +137,12 @@ ul {
 .clock-container {
   height: 60px;
   position: absolute;
-  left: 75%;
+  right: 5;
   top: 15px;
-  width: 22%;
+  width: 25vw;
   z-index: 2;
+  display: grid;
+  grid-template-columns: 10% 90%;
 }
 
 .clock-container > div {
@@ -149,18 +153,17 @@ ul {
 .clock-container .container-left {
   background-color: var(--bg-main);
   height: 100%;
-  width: 11%;
-  position: absolute;
+  width: 95%;
   color: var(--color-txt);
 }
 
 .clock-container .container-left .icon {
-  position: absolute;
+  position: relative;
   top: 30%;
-  right: 40%;
+  transform: translate(-50%, 0);
   background-color: #2b3d59;
   color: white;
-  font-size: 30px;
+  font-size: 2vw;
 }
 
 .clock-container .container-right {
@@ -169,27 +172,49 @@ ul {
   width: 100%;
   display: flex;
   white-space: nowrap;
-  position: absolute;
   left: 35px;
   align-items: center;
   justify-content: space-around;
   color: var(--color-txt);
+  min-width: max-content;
 }
 
 .clock-container .container-right .time-container {
-  font-size: 45px;
+  font-size: 2em;
+  margin-right: 10px;
 }
 
 .clock-container .container-right .date-container {
-  font-size: 30px;
+  font-size: 1.5em;
+  margin-left: 10px;
+}
+
+@media (max-width: 700px) {
+  .clock-container {
+    right: 10;
+    width: 30vw;
+  }
+}
+
+@media (max-width: 668px) {
+  .clock-container {
+    right: 40;
+  }
+}
+
+@media (max-width: 530px) {
+  .clock-container {
+    right: 50;
+  }
 }
 
 .popup-container {
   position: absolute;
-  left: 25%;
   width: 50%;
   z-index: 2;
   top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .menu-container {
@@ -401,4 +426,16 @@ ul {
   padding: 28px;
   text-align: left;
   font-size: 26px;
+}
+
+@media (max-width: 570px) {
+  .popup-container {
+    width: 75%;
+  }
+}
+
+@media (max-width: 390px) {
+  .popup-container {
+    width: 80%;
+  }
 }

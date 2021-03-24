@@ -1,4 +1,3 @@
-let myID = ""; // Your facebook UID
 let threadList;
 let lastMessageTimestamp;
 
@@ -219,8 +218,6 @@ function createMessage(message) {
   return divMessage;
 
   function createContent(messageObj, userInfo) {
-    console.log(messageObj);
-
     const divContent = document.createElement("div");
     divContent.className = "content";
 
@@ -284,8 +281,14 @@ function createMessage(message) {
         const img = document.createElement("img");
 
         img.src = attachment.url;
-        img.width = attachment.width / 2;
-        img.height = attachment.height / 2;
+
+        if (attachment.type === "sticker") {
+          img.width = attachment.width / 2;
+          img.height = attachment.height / 2;
+        } else {
+          img.width = attachment.width;
+          img.height = attachment.height;
+        }
 
         return img;
       }
@@ -457,38 +460,6 @@ function createName(name) {
 
 function dateDifference(startDate, endDate, unit = "seconds") {
   return moment(startDate).diff(moment(endDate), unit);
-}
-
-function handleScroll(container) {
-  let isDown = false;
-  let startY;
-  let scrollTop;
-
-  container.mousedown((e) => {
-    isDown = true;
-    startY = e.pageY - container.offset().top;
-    scrollTop = container.scrollTop();
-  });
-
-  container.mouseleave(() => {
-    isDown = false;
-  });
-
-  container.mouseup(() => {
-    isDown = false;
-  });
-
-  container.mousemove((e) => {
-    if (!isDown) return;
-
-    e.preventDefault();
-
-    const y = e.pageY - container.offset().top;
-
-    const distance = (y - startY) * 1.2;
-
-    container.scrollTop(scrollTop - distance);
-  });
 }
 
 $.fn.filterByData = function (prop, val) {

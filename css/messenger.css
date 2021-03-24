@@ -34,7 +34,7 @@
 }
 
 .messenger .title-heading {
-  font-size: 27px;
+  font-size: 20px;
   margin: 12px;
   text-align: center;
   font-weight: bold;
@@ -245,8 +245,17 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overflow-y: scroll;
+
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none;
   max-height: 300px;
   min-height: 300px;
+}
+
+.messenger-conversations::-webkit-scrollbar,
+.conversation-body::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
 }
 
 .conversation-unread .unread-icon {
@@ -256,4 +265,34 @@
   width: 12px;
   height: 12px;
   right: 0;
+}
+
+@media (max-width: 960px) {
+  .messenger {
+    width: 84vw;
+  }
+
+  .messenger .conversation {
+    display: block;
+  }
+
+  .messenger .conversation .info {
+    display: none;
+  }
+
+  .messenger .conversation .thumb {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 414px) {
+  .messenger {
+    width: 80vw;
+  }
+}
+
+@media (max-width: 328px) {
+  .messenger {
+    width: 78vw;
+  }
 }
